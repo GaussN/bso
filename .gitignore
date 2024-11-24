@@ -1,0 +1,9 @@
+.venv/
+tmp/
+__pycache__/
+.idea
+
+TODO
+FIX
+
+*.sqlite3
