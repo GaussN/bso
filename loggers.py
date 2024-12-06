@@ -68,6 +68,11 @@ config = {
             "level": LOGGING_LEVEL,
             "propagate": False,
         },
+        "fastapi": {
+            "handlers": ["console", "file"],
+            "level": LOGGING_LEVEL,
+            "propagate": False,
+        },
     },
     "root": {
         "level": logging.WARNING,
