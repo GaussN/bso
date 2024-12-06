@@ -19,8 +19,11 @@ def init_database(db_path=DB_PATH):
     with open("sql/init.sql", "r") as file:
         init_script = file.read()
         logger.info(f"read {db_path}")
-    if md5(init_script.encode()).hexdigest() != INIT_SCRIPT_MD5SUM:
+    init_script_sum = md5(init_script.encode()).hexdigest()
+    if init_script_sum != INIT_SCRIPT_MD5SUM:
         logger.exception("Init script's sum doesn't equals")
+        logger.debug(f'script sum:"{init_script_sum}"')
+        logger.debug(f'should be: "{INIT_SCRIPT_MD5SUM}"')
         raise Exception("Invalid init script")
     with get_connection(db_path) as conn:
         conn.executescript(init_script)
