@@ -1,6 +1,5 @@
 import sys
 import logging.config
-
 import colorama
 
 
@@ -22,15 +21,21 @@ class ColorFilter(logging.Filter):
         return True
 
 
+LOGGING_LEVEL = logging.DEBUG if __debug__ else logging.WARNING
+
 config = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
         "colored_console": {
-            "format": "%(name)s  %(c)s %(levelname)-8s %(r)s %(asctime)s.%(msecs)d %(c)s%(message)s%(r)s",
+            "format": ("%(name)s  %(c)s %(levelname)-8s %(r)s %(asctime)s."
+                       "%(msecs)d %(c)s%(message)s%(r)s"),
             "datefmt": "%s",
             "comment": "only for use with ColorFilter"
-        }
+        },
+        "file": {
+            "format": "%(name)s %(levelname)s %(asctime)s %(message)s",
+        },
     },
     "handlers": {
         "console": {
@@ -40,38 +45,35 @@ config = {
             "formatter": "colored_console",
             "filters": [ColorFilter()]
         },
+        "file": {
+            "()": logging.FileHandler,
+            "filename": "logs/.log",
+            "level": logging.DEBUG,
+            "formatter": "file",
+        },
     },
     "loggers": {
         "database": {
-            "handlers": ["console",],
-            "level": logging.DEBUG,
+            "handlers": ["console", "file"],
+            "level": LOGGING_LEVEL,
             "propagate": False,
         },
         "test": {
-            "handlers": ["console",],
-            "level": logging.DEBUG,
+            "handlers": ["console", "file"],
+            "level": LOGGING_LEVEL,
             "propagate": False,
         },
         "report_service": {
-            "handlers": ["console",],
-            "level": logging.DEBUG,
+            "handlers": ["console", "file"],
+            "level": LOGGING_LEVEL,
             "propagate": False,
         },
     },
     "root": {
-        "level": logging.ERROR,
+        "level": logging.WARNING,
         "handlers": ["console",]
     }
 }
 
 
 logging.config.dictConfig(config)
-
-
-if __name__ == '__main__':
-    log = logging.getLogger('test')
-    log.debug('debug')
-    log.info('info')
-    log.warning('warning')
-    log.error('error')
-    log.fatal('fatal')
