@@ -65,10 +65,6 @@ class BlankCRUD(_BlankCRUD_utils):
         return self.execute(query, BlankAdapter.to_dict(blanks))
         
 
-    def read(self) -> list[BlankOutDTO]:
-        return self.read_with_filter()
-
-
     def read_with_filter(self, raw_filter: str = "", params: Iterable | dict = tuple()) -> list[BlankOutDTO]:
         query = "SELECT * FROM blanks"
         if raw_filter:
@@ -76,6 +72,10 @@ class BlankCRUD(_BlankCRUD_utils):
         print(query)
         cur = self.execute(query, params, commit=False)
         return [BlankAdapter.from_dict(dict(i)) for i in cur]
+
+
+    def read(self) -> list[BlankOutDTO]:
+        return self.read_with_filter()
 
 
     def get(self, id: int) -> Optional[BlankOutDTO]:
