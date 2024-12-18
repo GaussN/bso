@@ -2,13 +2,13 @@ import os
 import unittest
 
 from report_service import ReportService
-from database import get_connection, init_database
+from database import gget_connection, init_database
 
 
 class ReportTest(unittest.TestCase):
     def setUp(self):
         self.test_db_path = os.path.join(os.getcwd(), "test.sqlite3")
-        self.get_connection = lambda: get_connection(self.test_db_path)
+        self.get_connection = gget_connection(self.test_db_path)
         init_database(self.test_db_path)
 
     def test_normalize_ranges(self):
@@ -193,7 +193,7 @@ class ReportTest(unittest.TestCase):
         )
         with open("sql/insert_test_data.sql", "r") as file:
             script = file.read()
-        with get_connection(self.test_db_path) as conn:
+        with self.get_connection() as conn:
             conn.executescript(script)
             conn.commit()
 
@@ -207,7 +207,3 @@ class ReportTest(unittest.TestCase):
     def tearDown(self):
         if os.path.exists(self.test_db_path):
             os.remove(self.test_db_path)
-
-
-if __name__ == "__main__":
-    unittest.main()

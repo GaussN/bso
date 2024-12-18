@@ -23,6 +23,12 @@ class ColorFilter(logging.Filter):
 
 LOGGING_LEVEL = logging.DEBUG if __debug__ else logging.WARNING
 
+DEFAULT_HANDLER_SETTINGS = {
+    "handlers": ["console", "file"],
+    "level": LOGGING_LEVEL,
+    "propagate": False,
+}
+
 config = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -46,33 +52,16 @@ config = {
             "filters": [ColorFilter()]
         },
         "file": {
-            "()": logging.FileHandler,
-            "filename": "logs/.log",
+            "()": logging.FileHandler,  # TODO: rotationg 
+            "filename": "logs/.log",  # TODO: env
             "level": logging.DEBUG,
             "formatter": "file",
         },
     },
     "loggers": {
-        "database": {
-            "handlers": ["console", "file"],
-            "level": LOGGING_LEVEL,
-            "propagate": False,
-        },
-        "test": {
-            "handlers": ["console", "file"],
-            "level": LOGGING_LEVEL,
-            "propagate": False,
-        },
-        "report_service": {
-            "handlers": ["console", "file"],
-            "level": LOGGING_LEVEL,
-            "propagate": False,
-        },
-        "fastapi": {
-            "handlers": ["console", "file"],
-            "level": LOGGING_LEVEL,
-            "propagate": False,
-        },
+        "database": DEFAULT_HANDLER_SETTINGS,
+        "blanks": DEFAULT_HANDLER_SETTINGS,
+        "fastapi": DEFAULT_HANDLER_SETTINGS,
     },
     "root": {
         "level": logging.WARNING,

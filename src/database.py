@@ -2,20 +2,27 @@ import os
 import sqlite3
 import logging
 from hashlib import md5
+from typing import Callable
+from functools import partial
 
 
 logger = logging.getLogger("database")
 
 
-DB_PATH = os.path.join(os.getcwd(), ".sqlite3")
+# LEGACY:
+DB_PATH = os.path.join(os.getcwd(), "..", ".sqlite3")
 INIT_SCRIPT_MD5SUM = '9621d88773e62f5c59b26f9cccb74fe1'
 
 
-def get_connection(db_path=DB_PATH) -> sqlite3.Connection:
+def get_connection(db_path: str) -> sqlite3.Connection:
     return sqlite3.connect(db_path, autocommit=False)
 
+# TODO: use partial instead 
+def gget_connection(db_path: str) -> Callable[[], sqlite3.Connection]:
+    return lambda: get_connection(db_path)
 
-def init_database(db_path=DB_PATH):
+
+def init_database(db_path):
     with open("sql/init.sql", "r") as file:
         init_script = file.read()
         logger.info(f"read {db_path}")

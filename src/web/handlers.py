@@ -1,7 +1,7 @@
+from fastapi import Depends
 from fastapi import APIRouter, FastAPI
 from fastapi.requests import Request
 from fastapi.responses import Response
-
 
 router = APIRouter(prefix="/blank")
 
@@ -24,7 +24,3 @@ async def _(request: Request):
 @router.delete("")
 async def _(request: Request):
     pass
-
-
-app = FastAPI()
-app.include_router(router)

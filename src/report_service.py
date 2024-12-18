@@ -2,8 +2,6 @@ import logging
 import sqlite3
 from typing import Callable, Iterable
 
-from database import get_connection
-
 
 class Queries:
     blanks_by_date_and_status = \
@@ -19,9 +17,9 @@ class Queries:
 
 
 class ReportService:
-    def __init__(self, _get_connection: Callable[[], sqlite3.Connection] = get_connection):
-        self._get_connection = _get_connection
-        self._logger = logging.getLogger('report_service')
+    def __init__(self, get_connection: Callable[[], sqlite3.Connection]):
+        self._get_connection = get_connection
+        self._logger = logging.getLogger('blanks.report')
 
     def __fetch(self, query: str, params: tuple = tuple()) -> list[tuple[int, str]]:
         with self._get_connection() as conn:
@@ -29,14 +27,20 @@ class ReportService:
         return cur.fetchall()
 
     def __get_numbers_by_series(self, raw_numbers: Iterable[tuple[int, str]]) -> dict[str, list]:
-        self._logger.log(0, "Gena")
+        """
+        Приводит список номеров бланков(серия, номер)
+        к виду {Серия:[Номера],...}
+        """
         normalize_ranges = {}
         for number, series in raw_numbers:
             normalize_ranges.setdefault(series, list()).append(number)
         return normalize_ranges
 
     def __get_ranges(self, raw_range: Iterable[tuple[int, str]]) -> dict[str, list[tuple[int]]]:
-        self._logger.log(0, "Gena")
+        """
+        Приводит список номеров бланков(серия, номер)
+        к виду {Серия:[(Начало диапазона, Конец диапазона),...],...}
+        """
         numbers_by_series_raw = self.__get_numbers_by_series(raw_range)
         ranges_by_series = {}
         for series in numbers_by_series_raw:
