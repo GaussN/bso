@@ -2,7 +2,7 @@ import logging
 import sqlite3
 import datetime as dt
 from abc import ABC
-from typing import Callable, Optional, Any
+from typing import Callable, Optional, Any, Iterable
 
 from src.web.models import BlankInDTO, BlankOutDTO, BlankUpdateDTO
 
@@ -28,7 +28,7 @@ class BlankAdapter(ABC):
 
 
 class _BlankCRUD_utils(ABC):
-    def execute(self, query: str, params: tuple | list = tuple(), *, commit: bool = True):
+    def execute(self, query: str, params: Iterable | dict = tuple(), *, commit: bool = True):
         try:
             if isinstance(params, list):
                 cursor = self._connection.executemany(query, params)    
@@ -66,8 +66,15 @@ class BlankCRUD(_BlankCRUD_utils):
         
 
     def read(self) -> list[BlankOutDTO]:
+        return self.read_with_filter()
+
+
+    def read_with_filter(self, raw_filter: str = "", params: Iterable | dict = tuple()) -> list[BlankOutDTO]:
         query = "SELECT * FROM blanks"
-        cur = self.execute(query, commit=False)
+        if raw_filter:
+            query += f" {raw_filter}"
+        print(query)
+        cur = self.execute(query, params, commit=False)
         return [BlankAdapter.from_dict(dict(i)) for i in cur]
 
 

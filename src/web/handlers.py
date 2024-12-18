@@ -16,6 +16,15 @@ async def _(request: Request):
     pass
 
 
+@router.post("many")
+async def _(request: Request):
+    pass
+
+
+async def _(request: Request):
+    pass
+
+
 @router.patch("")
 async def _(request: Request):
     pass

@@ -77,6 +77,18 @@ class BlanksCRUDTest(unittest.TestCase):
         self.assertEqual(models.BlankInDTO(series="AF", number=3), self._bcrud.get(3))
         self.assertIsNone(self._bcrud.get(4))
 
+    def test_read_with_filter(self):
+        with self._get_connection() as conn:
+            conn.execute("INSERT INTO blanks(id, series, number) VALUES(1, 'AF', 1)")
+            conn.execute("INSERT INTO blanks(id, series, number) VALUES(2, 'AA', 2)")
+            conn.execute("INSERT INTO blanks(id, series, number) VALUES(3, 'AF', 3)")
+            conn.commit()
+        expected_result = [
+            models.BlankInDTO(series="AF", number=1),
+            models.BlankInDTO(series="AF", number=3),
+        ]
+        self.assertListEqual(expected_result, self._bcrud.read_with_filter("WHERE series=?", ("AF",)))
+
     def test_read(self):
         with self._get_connection() as conn:
             conn.execute("INSERT INTO blanks(id, series, number) VALUES(1, 'AF', 1)")
