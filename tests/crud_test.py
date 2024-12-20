@@ -62,7 +62,7 @@ class GetUpdateStmtTest(unittest.TestCase):
 class BlanksCRUDTest(unittest.TestCase):
     def setUp(self):
         self.test_db_path = os.path.join(os.getcwd(), "test.sqlite3")
-        self.get_connection = partial(get_connection, (self.test_db_path,))
+        self.get_connection = partial(get_connection, self.test_db_path)
         self.crud = crud.BlankCRUD(self.get_connection)
         init_database(self.test_db_path)
 
