@@ -4,7 +4,7 @@ import datetime as dt
 from abc import ABC
 from typing import Callable, Optional, Any, Iterable
 
-from src.web.models import BlankInDTO, BlankOutDTO, BlankUpdateDTO
+from web.models import BlankInDTO, BlankOutDTO, BlankUpdateDTO
 
 
 class BlankAdapter(ABC):

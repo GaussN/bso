@@ -1,4 +1,4 @@
-CREATE TABLE blanks (
+CREATE TABLE IF NOT EXISTS blanks (
 	id          INTEGER NOT NULL,
 	number      INTEGER NOT NULL CHECK(number <= 9999999),
 	series TEXT NOT NULL,
@@ -12,4 +12,4 @@ CREATE TABLE blanks (
 	CONSTRAINT unique_num_ser UNIQUE(number, series)
 );
 
-CREATE VIEW c_blanks AS SELECT * FROM blanks WHERE deleted_at IS NULL;
+CREATE VIEW IF NOT EXISTS c_blanks AS SELECT * FROM blanks WHERE deleted_at IS NULL;

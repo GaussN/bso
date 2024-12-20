@@ -1,10 +1,10 @@
+import os
 import sys
-import logging.config
 import colorama
+import logging.config
 
 
 colorama.init()
-
 class ColorFilter(logging.Filter):
     _d = {
         0: colorama.Fore.LIGHTBLACK_EX,
@@ -22,6 +22,8 @@ class ColorFilter(logging.Filter):
 
 
 LOGGING_LEVEL = logging.DEBUG if __debug__ else logging.WARNING
+LOGGS_PATH = os.environ["BSO_LOGS_PATH"]
+
 
 DEFAULT_HANDLER_SETTINGS = {
     "handlers": ["console", "file"],
@@ -52,8 +54,8 @@ config = {
             "filters": [ColorFilter()]
         },
         "file": {
-            "()": logging.FileHandler,  # TODO: rotationg 
-            "filename": "logs/.log",  # TODO: env
+            "()": logging.FileHandler,
+            "filename": os.path.join(LOGGS_PATH, ".log"),  
             "level": logging.DEBUG,
             "formatter": "file",
         },
