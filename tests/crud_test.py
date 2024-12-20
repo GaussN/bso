@@ -2,12 +2,11 @@ import os
 import sqlite3
 import unittest 
 import datetime as dt
+from functools import partial
 
 import src.web.models as models
 import src.web.blank_crud as crud
-from src.database import init_database, gget_connection
-
-import loggers
+from src.database import init_database, get_connection
 
 
 class BlankAdapterTest(unittest.TestCase):
@@ -59,7 +58,7 @@ class GetUpdateStmtTest(unittest.TestCase):
 class BlanksCRUDTest(unittest.TestCase):
     def setUp(self):
         self._db_path = "test.sqlite3"
-        self._get_connection = gget_connection(self._db_path)
+        self._get_connection = partial(get_connection, (self._db_path,))
         self._bcrud = crud.BlankCRUD(self._get_connection)
         init_database(self._db_path)
 

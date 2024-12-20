@@ -17,10 +17,6 @@ INIT_SCRIPT_MD5SUM = '9621d88773e62f5c59b26f9cccb74fe1'
 def get_connection(db_path: str) -> sqlite3.Connection:
     return sqlite3.connect(db_path, autocommit=False)
 
-# TODO: use partial instead 
-def gget_connection(db_path: str) -> Callable[[], sqlite3.Connection]:
-    return lambda: get_connection(db_path)
-
 
 def init_database(db_path):
     with open("sql/init.sql", "r") as file:
