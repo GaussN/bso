@@ -1,9 +1,5 @@
 __pycache__/
-.vscode/
-.venv/
 .idea/
-logs/
-tmp/
 
 .env
 

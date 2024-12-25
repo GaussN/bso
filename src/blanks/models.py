@@ -39,17 +39,20 @@ class BlankOutDTO(BlankInDTO):
 
 class BlankUpdateDTO(BlankInDTO):
     id: int
-    series: Optional[str] = None
-    number: Optional[int] = None
+    # series: Optional[str] = None
+    # number: Optional[int] = None
     comment: Optional[str] = None
     status: Optional[BlankState | int] = None
     
-    def get_update_stmt(self) -> tuple[str, tuple]:
-        if isinstance(self.status, BlankState):
-            self.status = self.status.value  # WARNING: cs
-        params = []
-        def _(k, v):
-            params.append(v)
-            return f"{k}=?"
-        sets = ",".join((_(k, v) for k,v in self.__dict__.items() if v and k != "id"))
-        return f"UPDATE blanks SET {sets},updated_at=datetime('now') WHERE id=?", (*params, self.id)    
+
+class BlankRangeInDTO(BaseModel):
+    """
+    WARN:
+    range include both borders 
+    """
+    series: str
+    start: int
+    end: int
+
+    def get_range(self):
+        return range(self.start, self.end+1)

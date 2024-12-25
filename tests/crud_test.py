@@ -4,9 +4,9 @@ import unittest
 import datetime as dt
 from functools import partial
 
-import src.web.models as models
-import src.web.blank_crud as crud
-from src.database import init_database, get_connection
+import blanks.models as models
+import blanks.crud as crud
+from database import init_database, get_connection
 
 
 class BlankAdapterTest(unittest.TestCase):
@@ -47,16 +47,6 @@ class BlankAdapterTest(unittest.TestCase):
             updated_at=dt.date(2024,12,13),
         )
         self.assertTrue(res.full_compare(excepted))
-
-
-# FIXME: 
-class GetUpdateStmtTest(unittest.TestCase):
-    def test_get_update_stmt(self):
-        update_blank = models.BlankUpdateDTO(id=1, comment="gena", status=models.BlankState.Use)
-        self.assertTupleEqual(
-            ("UPDATE blanks SET comment=?,status=?,updated_at=datetime('now') WHERE id=?", ("gena", 1, 1)),
-            update_blank.get_update_stmt()
-        )
 
 
 class BlanksCRUDTest(unittest.TestCase):
@@ -111,8 +101,6 @@ class BlanksCRUDTest(unittest.TestCase):
     def test_create_one(self):
         new_blank = models.BlankInDTO(series="AF", number=1)
         self.crud.create(new_blank)
-        print(f"{new_blank=}")
-        print(f"{self.crud.get(1)=}")
         self.assertEqual(new_blank, self.crud.get(1))
 
     def test_create_seq(self):
@@ -123,6 +111,15 @@ class BlanksCRUDTest(unittest.TestCase):
         ]
         self.crud.create(new_blanks)
         self.assertListEqual(new_blanks, self.crud.read())
+
+    def test_create_from_range(self):
+        blanks_range = models.BlankRangeInDTO(series="AF", start=100, end=115)
+        expected_result = [models.BlankInDTO(series="AF", number=n) for n in blanks_range.get_range()]
+        self.crud.create_from_range(blanks_range)
+        self.assertListEqual(
+            expected_result, 
+            self.crud.read()
+        )
 
     def test_update(self):
         blank = models.BlankInDTO(series="AF", number=1, comment="gapan")

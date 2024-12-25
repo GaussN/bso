@@ -18,7 +18,7 @@ def get_connection(db_path: str) -> sqlite3.Connection:
     return sqlite3.connect(db_path, autocommit=False)
 
 
-def init_database(db_path):
+def init_database(db_path: str):
     with open(os.path.join(SQL_PATH, "init.sql"), "r") as file:
         init_script = file.read()
         logger.info(f"read {db_path}")
