@@ -17,25 +17,25 @@ class BlankAdapter(ABC):
 
     @staticmethod
     def to_dict(blank: models.BlankInDTO) -> dict:
-        _dict = blank.__dict__
-        if date := _dict["date"]:
-            _dict["date"] = date.strftime(BlankAdapter.__date_format)
-        if isinstance(status := _dict["status"], models.BlankStatus):
-            _dict["status"] = status.value
-        return _dict
+        dict_ = blank.__dict__
+        if date := dict_["date"]:
+            dict_["date"] = date.strftime(BlankAdapter.__date_format)
+        if isinstance(status := dict_["status"], models.BlankStatus):
+            dict_["status"] = status.value
+        return dict_
 
     @staticmethod
-    def from_dict(_dict: dict) -> models.BlankOutDTO:
-        if not _dict:
+    def from_dict(dict_: dict) -> models.BlankOutDTO:
+        if not dict_:
             return None
         for date_field in ("date", "created_at", "updated_at", "deleted_at"):
-            date = _dict.get(date_field)
+            date = dict_.get(date_field)
             if date and isinstance(date, str):
-                _dict[date_field] = dt.datetime.strptime(date, BlankAdapter.__date_format)
-        status = _dict.get("status")
+                dict_[date_field] = dt.datetime.strptime(date, BlankAdapter.__date_format)
+        status = dict_.get("status")
         if status is not None and isinstance(status, int):
-            _dict["status"] = models.BlankStatus(status)
-        return models.BlankOutDTO(**_dict)
+            dict_["status"] = models.BlankStatus(status)
+        return models.BlankOutDTO(**dict_)
 
 
 class _BlankCRUD_utils(ABC):
