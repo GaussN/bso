@@ -11,7 +11,12 @@ from database import init_database, get_connection
 
 class BlankAdapterTest(unittest.TestCase):
     def test_to_dict(self):
-        input = models.BlankInDTO(date=dt.date(2024,12,12), series="AF", number=1)
+        input = models.BlankInDTO(
+            date=dt.date(2024,12,12), 
+            series="AF", 
+            number=1, 
+            status=models.BlankStatus.Clean
+        )
         res = crud.BlankAdapter.to_dict(input)
         excepted = {
             "date": "2024-12-12 00:00:00", "series": "AF", 
@@ -43,6 +48,7 @@ class BlankAdapterTest(unittest.TestCase):
             date=dt.date(2024,12,12),
             series="AF",
             number=1,
+            status=models.BlankStatus.Clean,
             created_at=dt.date(2024,12,12),
             updated_at=dt.date(2024,12,13),
         )
@@ -121,17 +127,32 @@ class BlanksCRUDTest(unittest.TestCase):
             self.crud.read()
         )
 
-    def test_update(self):
+    def test_update_comment(self):
         blank = models.BlankInDTO(series="AF", number=1, comment="gapan")
         self.crud.create(blank)
         self.crud.update(models.BlankUpdateDTO(id=1, comment="gena"))
         updated_blank = self.crud.get(1)
         self.assertEqual(updated_blank.comment, "gena")
 
+    def test_update_status(self):
+        blank = models.BlankInDTO(series="AF", number=1)
+        self.crud.create(blank)
+        self.crud.update(models.BlankUpdateDTO(id=1, status=models.BlankStatus.Lost))
+        updated_blank = self.crud.get(1)
+        self.assertEqual(updated_blank.status, models.BlankStatus.Lost)
+
+    def test_update_date(self):
+        blank = models.BlankInDTO(series="AF", number=1)
+        self.crud.create(blank)
+        self.crud.update(models.BlankUpdateDTO(id=1, date=dt.date(1970, 1, 1)))
+        updated_blank = self.crud.get(1)
+        self.assertEqual(updated_blank.date, dt.date(1970, 1, 1))
+
     def test_delete(self):
         blank = models.BlankInDTO(series="AF", number=1)
         cur = self.crud.create(blank)
         cur: sqlite3.Cursor
+        # LOL: оно нихуя не проверяет :D
         self.assertIsNotNone(self.crud.get(1))
         self.crud.delete(1)
         self.assertIsNotNone(self.crud.get(1))

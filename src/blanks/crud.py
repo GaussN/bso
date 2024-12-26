@@ -12,20 +12,30 @@ class BlankAdapter(ABC):
     __date_format = "%Y-%m-%d %H:%M:%S"
 
     @staticmethod
-    def to_dict(blank: models.BlankInDTO) -> dict:
-        d = blank.__dict__
-        if date := d["date"]:
-            d["date"] = date.strftime(BlankAdapter.__date_format)
-        return d
+    def strftime(date: dt.date) -> str:
+        return date.strftime(BlankAdapter.__date_format)
 
     @staticmethod
-    def from_dict(d: dict) -> models.BlankOutDTO:
-        if not d:
+    def to_dict(blank: models.BlankInDTO) -> dict:
+        _dict = blank.__dict__
+        if date := _dict["date"]:
+            _dict["date"] = date.strftime(BlankAdapter.__date_format)
+        if isinstance(status := _dict["status"], models.BlankStatus):
+            _dict["status"] = status.value
+        return _dict
+
+    @staticmethod
+    def from_dict(_dict: dict) -> models.BlankOutDTO:
+        if not _dict:
             return None
-        for k, v in d.items():
-            if isinstance(v, dt.date):
-                d[k] = v.strftime(BlankAdapter.__date_format)
-        return models.BlankOutDTO(**d)
+        for date_field in ("date", "created_at", "updated_at", "deleted_at"):
+            date = _dict.get(date_field)
+            if date and isinstance(date, str):
+                _dict[date_field] = dt.datetime.strptime(date, BlankAdapter.__date_format)
+        status = _dict.get("status")
+        if status is not None and isinstance(status, int):
+            _dict["status"] = models.BlankStatus(status)
+        return models.BlankOutDTO(**_dict)
 
 
 class _BlankCRUD_utils(ABC):
@@ -36,14 +46,17 @@ class _BlankCRUD_utils(ABC):
 
 
     def _get_update_stmt(self, blank_update: models.BlankUpdateDTO) -> tuple[str, tuple]:
-        if isinstance(blank_update.status, models.BlankState):
-            blank_update.status = blank_update.status.value  # WARNING: cs
+        _blank_update = blank_update.copy()
+        if isinstance(_blank_update.status, models.BlankStatus):
+            _blank_update.status = _blank_update.status.value 
+        if isinstance(_blank_update.date, dt.date):
+            _blank_update.date = BlankAdapter.strftime(_blank_update.date) 
         params = []
         def _(k, v):
             params.append(v)
             return f"{k}=?"
-        sets = ",".join((_(k, v) for k,v in blank_update.__dict__.items() if v and k != "id"))
-        return f"UPDATE blanks SET {sets},updated_at=datetime('now') WHERE id=?", (*params, blank_update.id) 
+        sets = ",".join((_(k, v) for k,v in _blank_update.__dict__.items() if v and k != "id"))
+        return f"UPDATE blanks SET {sets},updated_at=datetime('now') WHERE id=?", (*params, _blank_update.id) 
 
     
     def execute(self, query: str, params: Iterable | dict = tuple(), *, commit: bool = True):
