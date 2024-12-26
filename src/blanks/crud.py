@@ -30,8 +30,9 @@ class BlankAdapter(ABC):
             return None
         for date_field in ("date", "created_at", "updated_at", "deleted_at"):
             date = dict_.get(date_field)
-            if date and isinstance(date, str):
+            if isinstance(date, str):
                 dict_[date_field] = dt.datetime.strptime(date, BlankAdapter.__date_format)
+        date = dict_.get("date")
         status = dict_.get("status")
         if status is not None and isinstance(status, int):
             dict_["status"] = models.BlankStatus(status)
@@ -46,19 +47,15 @@ class _BlankCRUD_utils(ABC):
 
 
     def _get_update_stmt(self, blank_update: models.BlankUpdateDTO) -> tuple[str, tuple]:
-        _blank_update = blank_update.copy()
-        if isinstance(_blank_update.status, models.BlankStatus):
-            _blank_update.status = _blank_update.status.value 
-        if isinstance(_blank_update.date, dt.date):
-            _blank_update.date = BlankAdapter.strftime(_blank_update.date) 
+        blank_updates_dict = BlankAdapter.to_dict(blank_update)
         params = []
         def _(k, v):
             params.append(v)
             return f"{k}=?"
-        sets = ",".join((_(k, v) for k,v in _blank_update.__dict__.items() if v and k != "id"))
+        sets = ",".join((_(k, v) for k,v in blank_updates_dict.items() if v and k != "id"))
         return (
             (f"UPDATE blanks SET {sets},updated_at=datetime('now') WHERE id=? RETURNING id"), 
-            (*params, _blank_update.id)
+            (*params, blank_update.id)
         )
 
     
@@ -73,9 +70,10 @@ class _BlankCRUD_utils(ABC):
         except sqlite3.IntegrityError as ie:
             self._logger.error(ie)
             self._connection.rollback()
+            commit = False
             raise
-        if commit:
-            self._connection.commit()
+        finally:
+            commit and self._connection.commit
             
             
 

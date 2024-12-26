@@ -14,6 +14,7 @@ from fastapi.requests import Request
 from fastapi.responses import Response, JSONResponse
 
 import blanks.models as models
+from blanks.crud import BlankAdapter
 
 
 router = APIRouter(prefix="/blank")
@@ -38,7 +39,7 @@ async def get_blanks(
     elif number:
         result = crud.read_with_filter("WHERE series||number LIKE ?", (number,))
     elif date:
-        result = crud.read_with_filter("WHERE date = ?", (date.strftime("%Y-%m-%d"),))
+        result = crud.read_with_filter("WHERE date = ?", (BlankAdapter.strftime(date),))
     if result:
         return result 
     raise HTTPException(status_code=404)
@@ -49,15 +50,17 @@ async def create_blanks(request: Request, range_: models.BlankRangeInDTO):
     try:
         request.state.crud.create_from_range(range_)
     except:
-        return JSONResponse(status_code=400, content={"msg": "Ivalid range"})
+        return Response(status_code=400, content="Ivalid range")
     return Response(status_code=201) 
 
 
 @router.patch("")
 async def update_blank(request: Request, updates: models.BlankUpdateDTO):
-    request.state.crud.update(updates)
+    if not request.state.crud.update(updates):
+        raise HTTPException(status_code=404)
 
 
 @router.delete("")
 async def delete_blank(request: Request, id: int):
-    request.state.crud.delete(id)
+    if not request.state.crud.delete(id):
+        raise HTTPException(status_code=404)
