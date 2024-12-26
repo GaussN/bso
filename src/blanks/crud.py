@@ -104,7 +104,7 @@ class BlankCRUD(_BlankCRUD_utils):
 
 
     def read_with_filter(self, raw_filter: str = "", params: Iterable | dict = tuple()) -> list[models.BlankOutDTO]:
-        query = "SELECT * FROM blanks"
+        query = "SELECT * FROM c_blanks"
         if raw_filter:
             query += f" {raw_filter}"
         cur = self.execute(query, params, commit=False)
@@ -116,7 +116,7 @@ class BlankCRUD(_BlankCRUD_utils):
 
 
     def get(self, id: int) -> Optional[models.BlankOutDTO]:
-        query = "SELECT * FROM blanks WHERE id = ?"
+        query = "SELECT * FROM c_blanks WHERE id = ?"
         cur = self.execute(query, (id,), commit=False)
         return BlankAdapter.from_dict(dict(cur.fetchone() or {}))
 

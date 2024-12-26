@@ -2,6 +2,7 @@ import os
 import sqlite3
 import unittest 
 import datetime as dt
+from random import random
 from functools import partial
 
 import blanks.models as models
@@ -57,7 +58,7 @@ class BlankAdapterTest(unittest.TestCase):
 
 class BlanksCRUDTest(unittest.TestCase):
     def setUp(self):
-        self.test_db_path = os.path.join(os.getcwd(), "test.sqlite3")
+        self.test_db_path = os.path.join(os.getcwd(), f"{random()*1000}.sqlite3")
         self.get_connection = partial(get_connection, self.test_db_path)
         self.crud = crud.BlankCRUD(self.get_connection)
         init_database(self.test_db_path)
@@ -152,7 +153,6 @@ class BlanksCRUDTest(unittest.TestCase):
         blank = models.BlankInDTO(series="AF", number=1)
         cur = self.crud.create(blank)
         cur: sqlite3.Cursor
-        # LOL: оно нихуя не проверяет :D
         self.assertIsNotNone(self.crud.get(1))
         self.crud.delete(1)
-        self.assertIsNotNone(self.crud.get(1))
+        self.assertIsNone(self.crud.get(1))
