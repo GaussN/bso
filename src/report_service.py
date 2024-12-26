@@ -8,6 +8,7 @@ class Queries:
         "SELECT number, series FROM c_blanks as b WHERE b.date LIKE ? AND b.status = ? ORDER BY series, number"
     new_blanks = \
         "SELECT number, series FROM c_blanks as b WHERE b.created_at LIKE ? ORDER BY series, number"
+    # TODO: there is can be used one query 
     clean_blanks_at_month_begin = \
         ("SELECT number, series FROM c_blanks as b "
          "WHERE b.created_at < ? AND (b.date >= ? OR b.date is NULL) ORDER BY series, number")
@@ -94,3 +95,5 @@ class ReportService:
             ),
         }
         return report
+
+    

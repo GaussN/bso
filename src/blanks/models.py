@@ -4,7 +4,7 @@ import datetime as dt
 from typing import Optional, Annotated, Any
 
 from pydantic import BaseModel, Field
-from pydantic import validator, ValidationError, AfterValidator
+from pydantic import validator, AfterValidator
 
 
 class BlankStatus(Enum):
@@ -25,7 +25,7 @@ class SeriesValidator:
     def __call__(self, series: str) -> str:
         if self._patter.fullmatch(series):
             return series
-        raise ValidationError(f"seies should have full match {self._patter} ")
+        raise ValueError(f"seies should have full match {self._patter} ")
 
 
 class NumberValidator:
@@ -35,7 +35,7 @@ class NumberValidator:
     def __call__(self, number: int) -> int:
         if number <= self._max_value:
             return number
-        raise ValidationError(f"number should be in range (0, {self._max_value}] ")
+        raise ValueError(f"number should be in range (0, {self._max_value}] ")
 
 
 class BlankInDTO(BaseModel):
