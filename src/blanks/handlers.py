@@ -45,7 +45,7 @@ async def get_blanks(
 
 
 @router.post("")
-async def _(request: Request, range_: models.BlankRangeInDTO):
+async def create_blanks(request: Request, range_: models.BlankRangeInDTO):
     try:
         request.state.crud.create_from_range(range_)
     except:
@@ -54,10 +54,10 @@ async def _(request: Request, range_: models.BlankRangeInDTO):
 
 
 @router.patch("")
-async def _(request: Request, updates: models.BlankUpdateDTO):
+async def update_blank(request: Request, updates: models.BlankUpdateDTO):
     request.state.crud.update(updates)
 
 
 @router.delete("")
-async def _(request: Request, id: int):
+async def delete_blank(request: Request, id: int):
     request.state.crud.delete(id)

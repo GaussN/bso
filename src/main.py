@@ -45,8 +45,3 @@ async def get_report(
 ):
     report_service = ReportService(get_connection)
     return report_service.get_report(year, month)
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8888, reload=True)

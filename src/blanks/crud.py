@@ -56,7 +56,10 @@ class _BlankCRUD_utils(ABC):
             params.append(v)
             return f"{k}=?"
         sets = ",".join((_(k, v) for k,v in _blank_update.__dict__.items() if v and k != "id"))
-        return f"UPDATE blanks SET {sets},updated_at=datetime('now') WHERE id=?", (*params, _blank_update.id) 
+        return (
+            (f"UPDATE blanks SET {sets},updated_at=datetime('now') WHERE id=? RETURNING id"), 
+            (*params, _blank_update.id)
+        )
 
     
     def execute(self, query: str, params: Iterable | dict = tuple(), *, commit: bool = True):
@@ -66,13 +69,14 @@ class _BlankCRUD_utils(ABC):
             else: 
                 cursor = self._connection.execute(query, params)
             cursor.row_factory = sqlite3.Row
-            if commit:
-                self._connection.commit()
             return cursor
         except sqlite3.IntegrityError as ie:
             self._logger.error(ie)
             self._connection.rollback()
             raise
+        if commit:
+            self._connection.commit()
+            
             
 
 class BlankCRUD(_BlankCRUD_utils):
@@ -92,8 +96,8 @@ class BlankCRUD(_BlankCRUD_utils):
         return self.execute(*self._get_insert_stmt_from_range(range_), commit=True)
 
 
-    def create(self, blanks: models.BlankInDTO | list[models.BlankInDTO]) -> sqlite3.Cursor:
-        """NOT USED"""
+    def _create(self, blanks: models.BlankInDTO | list[models.BlankInDTO]) -> sqlite3.Cursor:
+        """ONLY FOR TESTS"""
         query = (
             "INSERT INTO blanks(date, series, number, comment, status) " 
             "VALUES(:date, :series, :number, :comment, :status) "
@@ -121,11 +125,13 @@ class BlankCRUD(_BlankCRUD_utils):
         return BlankAdapter.from_dict(dict(cur.fetchone() or {}))
 
 
-    def update(self, updates: models.BlankUpdateDTO) -> sqlite3.Cursor:
-        return self.execute(*self._get_update_stmt(updates), commit=True)
+    def update(self, updates: models.BlankUpdateDTO) -> bool:
+        _ = self.execute(*self._get_update_stmt(updates), commit=True).fetchone()
+        return not not _
 
 
-    def delete(self, id: int) -> sqlite3.Cursor:
-        query = "UPDATE blanks SET updated_at=datetime('now'),deleted_at=datetime('now') WHERE id=?"
-        return self.execute(query, (id,), commit=True)
+    def delete(self, id: int) -> bool:
+        query = "UPDATE blanks SET updated_at=datetime('now'),deleted_at=datetime('now') WHERE id=? RETURNING id"
+        _ = self.execute(query, (id,), commit=True).fetchone()
+        return not not _
         

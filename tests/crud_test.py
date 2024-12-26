@@ -107,7 +107,7 @@ class BlanksCRUDTest(unittest.TestCase):
 
     def test_create_one(self):
         new_blank = models.BlankInDTO(series="AF", number=1)
-        self.crud.create(new_blank)
+        self.crud._create(new_blank)
         self.assertEqual(new_blank, self.crud.get(1))
 
     def test_create_seq(self):
@@ -116,7 +116,7 @@ class BlanksCRUDTest(unittest.TestCase):
             models.BlankInDTO(series="AF", number=2),
             models.BlankInDTO(series="AF", number=3),
         ]
-        self.crud.create(new_blanks)
+        self.crud._create(new_blanks)
         self.assertListEqual(new_blanks, self.crud.read())
 
     def test_create_from_range(self):
@@ -130,29 +130,48 @@ class BlanksCRUDTest(unittest.TestCase):
 
     def test_update_comment(self):
         blank = models.BlankInDTO(series="AF", number=1, comment="gapan")
-        self.crud.create(blank)
+        self.crud._create(blank)
         self.crud.update(models.BlankUpdateDTO(id=1, comment="gena"))
         updated_blank = self.crud.get(1)
         self.assertEqual(updated_blank.comment, "gena")
 
     def test_update_status(self):
         blank = models.BlankInDTO(series="AF", number=1)
-        self.crud.create(blank)
+        self.crud._create(blank)
         self.crud.update(models.BlankUpdateDTO(id=1, status=models.BlankStatus.Lost))
         updated_blank = self.crud.get(1)
         self.assertEqual(updated_blank.status, models.BlankStatus.Lost)
 
     def test_update_date(self):
         blank = models.BlankInDTO(series="AF", number=1)
-        self.crud.create(blank)
+        self.crud._create(blank)
         self.crud.update(models.BlankUpdateDTO(id=1, date=dt.date(1970, 1, 1)))
         updated_blank = self.crud.get(1)
         self.assertEqual(updated_blank.date, dt.date(1970, 1, 1))
 
+    def test_update_return(self):
+        blank = models.BlankInDTO(series="AF", number=1)
+        self.crud._create(blank)
+        self.assertTrue(
+            self.crud.update(models.BlankUpdateDTO(id=1, date=dt.date(1970, 1, 1)))
+        )
+        self.assertFalse(
+            self.crud.update(models.BlankUpdateDTO(id=2, date=dt.date(1970, 1, 1)))
+        )
+
     def test_delete(self):
         blank = models.BlankInDTO(series="AF", number=1)
-        cur = self.crud.create(blank)
-        cur: sqlite3.Cursor
+        cur = self.crud._create(blank)
         self.assertIsNotNone(self.crud.get(1))
         self.crud.delete(1)
         self.assertIsNone(self.crud.get(1))
+
+    def test_delete_return(self):
+        blank = models.BlankInDTO(series="AF", number=1)
+        cur = self.crud._create(blank)
+        self.assertTrue(
+            self.crud.delete(1)
+        )
+        self.assertFalse(
+            self.crud.delete(2)
+        )
