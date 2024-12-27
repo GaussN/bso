@@ -68,9 +68,6 @@ class ReportService:
         return ranges_by_series
 
     def get_report(self, year: int, month: int) -> dict:
-        if not (1 <= month <= 12):
-            raise ValueError("month value should be in range [1,12]")
-
         period_template = f'{year}-{month:02}-%'
         period_start = f'{year}-{month:02}-01'
         period_next_start = f'{year+int(month/12)}-{month%12+1:02}-01'
