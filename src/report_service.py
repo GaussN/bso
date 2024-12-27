@@ -8,19 +8,14 @@ class Queries:
         "SELECT number, series FROM c_blanks as b WHERE b.date LIKE ? AND b.status = ? ORDER BY series, number"
     new_blanks = \
         "SELECT number, series FROM c_blanks as b WHERE b.created_at LIKE ? ORDER BY series, number"
-    # TODO: there is can be used one query 
     clean_blanks_at_month_begin = \
         ("SELECT number, series FROM c_blanks as b "
          "WHERE b.created_at < ? AND (b.date >= ? OR b.date is NULL) ORDER BY series, number")
-    clean_blanks_at_month_end = \
-        ("SELECT number, series FROM blanks as b "
-         "WHERE b.created_at <= ? AND (b.status = 0 OR b.date >= ?) ORDER BY series, number")
 
 
 class ReportService:
     def __init__(self, get_connection: Callable[[], sqlite3.Connection]):
         self._get_connection = get_connection
-        self._logger = logging.getLogger('blanks.report')
 
     def __fetch(self, query: str, params: tuple = tuple()) -> list[tuple[int, str]]:
         with self._get_connection() as conn:
@@ -57,9 +52,11 @@ class ReportService:
         return ranges_by_series
 
     def get_report(self, year: int, month: int):
+        if not (1 <= month <= 12):
+            raise ValueError("month value should be in range [1,12]")
+
         period_template = f'{year}-{month:02}-%'
         period_start = f'{year}-{month:02}-01'
-        period_end = f'{year}-{month:02}-31'
         period_next_start = f'{year+int(month/12)}-{month%12+1:02}-01'
 
         report = {
@@ -90,7 +87,7 @@ class ReportService:
             ),
             "clean_at_end": self.__get_ranges(
                 self.__fetch(
-                    Queries.clean_blanks_at_month_end, (period_end, period_next_start)
+                    Queries.clean_blanks_at_month_begin, (period_next_start, period_next_start)
                 )
             ),
         }
