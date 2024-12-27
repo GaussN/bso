@@ -15,7 +15,7 @@ INIT_SCRIPT_MD5SUM = 'e4c08e6d78a54dff41ea015169b62c1d'
 
 
 def get_connection(db_path: str) -> sqlite3.Connection:
-    return sqlite3.connect(db_path, autocommit=False)
+    return sqlite3.connect(db_path, autocommit=True)
 
 
 def init_database(db_path: str):

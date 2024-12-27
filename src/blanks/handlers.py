@@ -3,13 +3,13 @@ FastAPI instance that will include the router
 should have middleware that 
 set request.state.crud: BlankCRUD
 """
+import json
 import datetime as dt
 from typing import Annotated, Optional
 
 from fastapi import Query
-from fastapi import Depends
 from fastapi import HTTPException
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter
 from fastapi.requests import Request
 from fastapi.responses import Response, JSONResponse
 

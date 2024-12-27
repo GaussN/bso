@@ -14,7 +14,7 @@ class BlankStatus(Enum):
     Lost = 3
 
 
-SERIES_PATTERN = r"\w{2}"
+SERIES_PATTERN = r"[A-ZА-Я]{2}"
 MAX_NUMBER = 9999999
 
 
@@ -62,11 +62,15 @@ class BlankOutDTO(BlankInDTO):
     deleted_at: Optional[dt.datetime] = None
 
 
+class Undefined(object):
+    pass
+
+
 class BlankUpdateDTO(BaseModel):
     id: int
-    date: Optional[dt.date] = None
-    comment: Optional[str] = None
-    status: Optional[BlankStatus | int] = None
+    date: dt.date | None = Undefined()
+    comment: str | None = Undefined()
+    status: BlankStatus | int | None = Undefined()
     
 
 class BlankRangeInDTO(BaseModel):

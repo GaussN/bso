@@ -18,7 +18,7 @@ class BlankAdapter(ABC):
     @staticmethod
     def to_dict(blank: models.BlankInDTO) -> dict:
         dict_ = blank.__dict__
-        if date := dict_["date"]:
+        if isinstance(date := dict_["date"], dt.date):
             dict_["date"] = date.strftime(BlankAdapter.__date_format)
         if isinstance(status := dict_["status"], models.BlankStatus):
             dict_["status"] = status.value
@@ -47,19 +47,21 @@ class _BlankCRUD_utils(ABC):
 
 
     def _get_update_stmt(self, blank_update: models.BlankUpdateDTO) -> tuple[str, tuple]:
-        blank_updates_dict = BlankAdapter.to_dict(blank_update)
+        blank_updates_dict = BlankAdapter.to_dict(blank_update)  # noqa
         params = []
         def _(k, v):
             params.append(v)
             return f"{k}=?"
-        sets = ",".join((_(k, v) for k,v in blank_updates_dict.items() if v and k != "id"))
+        sets = ",".join((_(k, v) for k,v in blank_updates_dict.items() if not isinstance(v, models.Undefined)  and k != "id"))
         return (
             (f"UPDATE blanks SET {sets},updated_at=datetime('now') WHERE id=? RETURNING id"), 
             (*params, blank_update.id)
         )
 
     
-    def execute(self, query: str, params: Iterable | dict = tuple(), *, commit: bool = True):
+    def execute(self, query: str, params: Iterable | dict = tuple()):
+        self._logger.log(15, f"{query=}")
+        self._logger.log(15, f"{params=}")
         try:
             if isinstance(params, list):
                 cursor = self._connection.executemany(query, params)    
@@ -70,11 +72,7 @@ class _BlankCRUD_utils(ABC):
         except sqlite3.IntegrityError as ie:
             self._logger.error(ie)
             self._connection.rollback()
-            commit = False
             raise
-        finally:
-            commit and self._connection.commit
-            
             
 
 class BlankCRUD(_BlankCRUD_utils):
@@ -82,16 +80,16 @@ class BlankCRUD(_BlankCRUD_utils):
         self._connection = get_connection()
         self._logger = logging.getLogger("blanks.CRUD")
         self._id = hex(id(self))
-        self._logger.debug(f"{self._id}.__init__")
+        self._logger.info(f"{self._id}.__init__")
         
 
     def __del__(self):
-        self._logger.debug(f"{self._id}.__del__")
+        self._logger.info(f"{self._id}.__del__")
         self._connection.close()
 
 
     def create_from_range(self, range_: models.BlankRangeInDTO) -> sqlite3.Cursor:
-        return self.execute(*self._get_insert_stmt_from_range(range_), commit=True)
+        return self.execute(*self._get_insert_stmt_from_range(range_))
 
 
     def _create(self, blanks: models.BlankInDTO | list[models.BlankInDTO]) -> sqlite3.Cursor:
@@ -109,7 +107,7 @@ class BlankCRUD(_BlankCRUD_utils):
         query = "SELECT * FROM c_blanks"
         if raw_filter:
             query += f" {raw_filter}"
-        cur = self.execute(query, params, commit=False)
+        cur = self.execute(query, params)
         return [BlankAdapter.from_dict(dict(i)) for i in cur]
 
 
@@ -119,17 +117,17 @@ class BlankCRUD(_BlankCRUD_utils):
 
     def get(self, id: int) -> Optional[models.BlankOutDTO]:
         query = "SELECT * FROM c_blanks WHERE id = ?"
-        cur = self.execute(query, (id,), commit=False)
+        cur = self.execute(query, (id,))
         return BlankAdapter.from_dict(dict(cur.fetchone() or {}))
 
 
     def update(self, updates: models.BlankUpdateDTO) -> bool:
-        _ = self.execute(*self._get_update_stmt(updates), commit=True).fetchone()
+        _ = self.execute(*self._get_update_stmt(updates)).fetchone()
         return not not _
 
 
     def delete(self, id: int) -> bool:
         query = "UPDATE blanks SET updated_at=datetime('now'),deleted_at=datetime('now') WHERE id=? RETURNING id"
-        _ = self.execute(query, (id,), commit=True).fetchone()
+        _ = self.execute(query, (id,)).fetchone()
         return not not _
         
