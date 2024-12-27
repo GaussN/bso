@@ -1,18 +1,10 @@
 import re
+import datetime
 from enum import Enum
-import datetime as dt
 from typing import Optional, Annotated, Any
 
-from pydantic import BaseModel, Field
-from pydantic import validator, AfterValidator
-
-
-class BlankStatus(Enum):
-    Clean = 0
-    Use = 1
-    Spoiled = 2
-    Lost = 3
-
+from pydantic import BaseModel
+from pydantic import AfterValidator
 
 SERIES_PATTERN = r"[A-ZА-Я]{2}"
 MAX_NUMBER = 9999999
@@ -38,10 +30,23 @@ class NumberValidator:
         raise ValueError(f"number should be in range (0, {self._max_value}] ")
 
 
+class BlankStatus(Enum):
+    Clean = 0
+    Use = 1
+    Spoiled = 2
+    Lost = 3
+
+
 class BlankInDTO(BaseModel):
-    date: Optional[dt.date] = None
-    series: Annotated[str, AfterValidator(SeriesValidator(pattern=SERIES_PATTERN))]
-    number: Annotated[int, AfterValidator(NumberValidator(max_value=MAX_NUMBER))]
+    date: Optional[datetime.date] = None
+    series: Annotated[
+        str, 
+        AfterValidator(SeriesValidator(pattern=SERIES_PATTERN))
+    ]
+    number: Annotated[
+        int, 
+        AfterValidator(NumberValidator(max_value=MAX_NUMBER))
+    ]
     comment: Optional[str] = ""
     status: Optional[BlankStatus | int] = 0
 
@@ -57,9 +62,9 @@ class BlankInDTO(BaseModel):
 
 class BlankOutDTO(BlankInDTO):
     id: Optional[int] = -1
-    created_at: Optional[dt.datetime] = None
-    updated_at: Optional[dt.datetime] = None
-    deleted_at: Optional[dt.datetime] = None
+    created_at: Optional[datetime.datetime] = None
+    updated_at: Optional[datetime.datetime] = None
+    deleted_at: Optional[datetime.datetime] = None
 
 
 class Undefined(object):
@@ -68,7 +73,7 @@ class Undefined(object):
 
 class BlankUpdateDTO(BaseModel):
     id: int
-    date: dt.date | None = Undefined()
+    date: datetime.date | None = Undefined()
     comment: str | None = Undefined()
     status: BlankStatus | int | None = Undefined()
     
@@ -78,9 +83,18 @@ class BlankRangeInDTO(BaseModel):
     WARN:
     range include both borders 
     """
-    series: Annotated[str, AfterValidator(SeriesValidator(pattern=SERIES_PATTERN))]
-    start: Annotated[int, AfterValidator(NumberValidator(max_value=MAX_NUMBER))]
-    end: Annotated[int, AfterValidator(NumberValidator(max_value=MAX_NUMBER))]
+    series: Annotated[
+        str, 
+        AfterValidator(SeriesValidator(pattern=SERIES_PATTERN))
+        ]
+    start: Annotated[
+        int, 
+        AfterValidator(NumberValidator(max_value=MAX_NUMBER))
+    ]
+    end: Annotated[
+        int, 
+        AfterValidator(NumberValidator(max_value=MAX_NUMBER))
+    ]
 
     def model_post_init(self, context: Any):
         if self.start > self.end:

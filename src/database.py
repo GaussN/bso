@@ -2,16 +2,12 @@ import os
 import sqlite3
 import logging
 from hashlib import md5
-from typing import Callable
-from functools import partial
-
-
-logger = logging.getLogger("database")
-
 
 DB_PATH = os.environ["BSO_DB_PATH"]
 SQL_PATH = os.environ["BSO_SQL_PATH"]
 INIT_SCRIPT_MD5SUM = 'e4c08e6d78a54dff41ea015169b62c1d'
+
+logger = logging.getLogger("database")
 
 
 def get_connection(db_path: str) -> sqlite3.Connection:

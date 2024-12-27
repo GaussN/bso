@@ -1,7 +1,21 @@
 import os
 import sys
-import colorama
 import logging.config
+
+import colorama
+
+LOGGING_LEVEL =  int(
+    os.environ.get(
+        "LOG_LEVEL", 
+        logging.DEBUG if __debug__ else logging.WARNING
+    )
+) 
+LOGGS_PATH = os.environ["BSO_LOGS_PATH"]
+DEFAULT_LOGGER_SETTINGS = {
+    "handlers": ["console", "file"],
+    "level": LOGGING_LEVEL,
+    "propagate": False,
+}
 
 
 colorama.init()
@@ -21,16 +35,6 @@ class ColorFilter(logging.Filter):
         setattr(record, "r", colorama.Style.RESET_ALL)
         return True
 
-
-LOGGING_LEVEL =  int(os.environ.get("LOG_LEVEL", logging.DEBUG if __debug__ else logging.WARNING)) 
-LOGGS_PATH = os.environ["BSO_LOGS_PATH"]
-
-
-DEFAULT_LOGGER_SETTINGS = {
-    "handlers": ["console", "file"],
-    "level": LOGGING_LEVEL,
-    "propagate": False,
-}
 
 config = {
     "version": 1,

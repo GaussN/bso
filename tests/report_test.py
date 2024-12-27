@@ -27,18 +27,24 @@ class ReportTest(unittest.TestCase):
                 "expected_result": {"AA": [1, 3, 4]},
             },
             {
-                "input_data": ((1, "AA"), (2, "AA"), (3, "AA"), (1, "BB"), (2, "BB"), (3, "BB")),
+                "input_data": (
+                    (1, "AA"), (2, "AA"), (3, "AA"), 
+                    (1, "BB"), (2, "BB"), (3, "BB")
+                ),
                 "expected_result": {"AA": [1, 2, 3], "BB": [1, 2, 3]},
             },
             {
-                "input_data": ((1, "AA"), (2, "BB"), (3, "AA"), (1, "BB"), (2, "AA"), (3, "BB")),
+                "input_data": (
+                    (1, "AA"), (2, "BB"), (3, "AA"), 
+                    (1, "BB"), (2, "AA"), (3, "BB")
+                ),
                 "expected_result": {"AA": [1, 3, 2], "BB": [2, 1, 3]},
             },
         )
         rep = ReportService(None)  # noqa
         for data in test_data:
             self.assertDictEqual(
-                rep._ReportService__get_numbers_by_series(data["input_data"]),
+                rep._goruped_numbers(data["input_data"]),
                 data["expected_result"]
             )
 
@@ -53,23 +59,35 @@ class ReportTest(unittest.TestCase):
                 "expected_result": {"GG": [(1, 1), (3,3)]}
             },
             {
-                "input_data": ((1, "GG"),(2, "GG"),(5, "GG"),(15, "GG"),(16, "GG"),),
+                "input_data": (
+                    (1, "GG"),(2, "GG"),
+                    (5, "GG"),(15, "GG"),(16, "GG"),
+                ),
                 "expected_result": {"GG": [(1, 2),(5,5),(15,16)]}
             },
             {
-                "input_data": ((1, "GG"), (2, "GG"), (3, "GG"),(2, "AA"),(3, "AA"),(4, "AA")),
+                "input_data": (
+                    (1, "GG"),(2, "GG"),(3, "GG"),
+                    (2, "AA"),(3, "AA"),(4, "AA")
+                ),
                 "expected_result": {"GG": [(1, 3)], "AA": [(2,4)]}
             },
             {
                 "input_data": ((1, "GG"), (3, "GG"),(3, "AA"), (5, "AA")),
-                "expected_result": {"GG": [(1, 1), (3, 3)], "AA": [(3,3), (5,5)]}
+                "expected_result": {
+                    "GG": [(1, 1), (3, 3)], 
+                    "AA": [(3,3), (5,5)]
+                }
             },
             {
                 "input_data": (
                     (1, "GG"), (2, "GG"), (5, "GG"), (15, "GG"), (16, "GG"),
                     (1, "AA"), (2, "AA"), (5, "AA"), (15, "AA"), (16, "AA"),
                 ),
-                "expected_result": {"GG": [(1, 2), (5, 5), (15, 16)], "AA": [(1, 2), (5, 5), (15, 16)]}
+                "expected_result": {
+                    "GG": [(1, 2), (5, 5), (15, 16)], 
+                    "AA": [(1, 2), (5, 5), (15, 16)]
+                }
             },
             {
                 "input_data": (),
@@ -79,7 +97,7 @@ class ReportTest(unittest.TestCase):
         rep = ReportService(None)  # noqa
         for data in test_data:
             self.assertDictEqual(
-                rep._ReportService__get_ranges(data["input_data"]),
+                rep._get_ranges(data["input_data"]),
                 data["expected_result"]
             )
 
@@ -102,13 +120,16 @@ class ReportTest(unittest.TestCase):
                     (1, "GG"), (2, "GG"), (5, "AA"), (15, "GG"), (16, "GG"),
                     (1, "AA"), (2, "AA"), (5, "GG"), (15, "AA"), (16, "AA"),
                 ),
-                "expected_result": {"GG": [(1, 2), (15, 16), (5, 5)], "AA": [(5, 5), (1, 2), (15, 16)]},
+                "expected_result": {
+                    "GG": [(1, 2), (15, 16), (5, 5)], 
+                    "AA": [(5, 5), (1, 2), (15, 16)]
+                },
             },
         )
         rep = ReportService(None)  # noqa
         for data in test_data:
             self.assertDictEqual(
-                rep._ReportService__get_ranges(data["input_data"]),
+                rep._get_ranges(data["input_data"]),
                 data["expected_result"]
             )
 
@@ -150,7 +171,10 @@ class ReportTest(unittest.TestCase):
             {   
                 "input_data": (2025, 1),
                 "expected_result": {
-                    "use": {"AC": [(13, 13), (15, 15), (17, 19)], "AD": [(1, 1)]},
+                    "use": {
+                        "AC": [(13, 13), (15, 15), (17, 19)], 
+                        "AD": [(1, 1)]
+                    },
                     "new": {"AD": [(1, 9)]},
                     "spoiled": {"AC": [(14, 14), (16, 16)]},
                     "lost": {},
