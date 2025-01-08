@@ -10,6 +10,12 @@ LOGGING_LEVEL =  int(
         logging.DEBUG if __debug__ else logging.WARNING
     )
 ) 
+LOGFILE_MAXSIZE = int(
+    os.environ.get(
+        "LOGFILE_MAXSIZE",
+        8*1024*1024
+    )
+)
 LOGGS_PATH = os.environ["BSO_LOGS_PATH"]
 DEFAULT_LOGGER_SETTINGS = {
     "handlers": ["console", "file"],
@@ -58,8 +64,10 @@ config = {
             "filters": [ColorFilter()]
         },
         "file": {
-            "()": logging.FileHandler,
+            "()": logging.handlers.RotatingFileHandler,
             "filename": os.path.join(LOGGS_PATH, ".log"),  
+            "maxBytes": LOGFILE_MAXSIZE,
+            "backupCount": 8,
             "formatter": "file",
         },
     },
